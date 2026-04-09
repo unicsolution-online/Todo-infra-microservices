@@ -1,10 +1,10 @@
 terraform {
   backend "azurerm" {
-    storage_account_name = "shahedstg881"
+    storage_account_name = "shahedstg1981"
     container_name       = "tfscontainer"
     key                  = "dev.terraform.tfstate"
     resource_group_name  = "shahed-rg"
-    subscription_id      = "2c6da294-c904-4801-bffd-cd7f0b236e3d"
+    subscription_id      = "b7d189c2-9e45-4d46-a4a0-5699e534832b"
     use_azuread_auth     = true
   }
 }
