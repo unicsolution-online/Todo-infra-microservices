@@ -24,21 +24,12 @@ jobs:
 
     - name: Terraform Init
       run: terraform init -input=false
-      working-directory: Todo-infra-microservices
 
     - name: Terraform Validate
       run: terraform validate
-      working-directory: Todo-infra-microservices
 
     - name: Terraform Plan
-      run: terraform plan -out=tfplan
-      working-directory: Todo-infra-microservices
-
-    - name: Upload Plan Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: tfplan
-        path: Todo-infra-microservices/tfplan
+      run: terraform plan
 
 
   approval:
@@ -49,8 +40,7 @@ jobs:
       name: dev
 
     steps:
-    - name: Wait for approval
-      run: echo "Waiting for approval..."
+    - run: echo "Waiting for approval..."
 
 
   terraform-apply:
@@ -69,16 +59,8 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    - name: Download Plan Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: tfplan
-        path: Todo-infra-microservices
-
     - name: Terraform Init
       run: terraform init -input=false
-      working-directory: Todo-infra-microservices
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
-      working-directory: Todo-infra-microservices
+      run: terraform apply -auto-approve
