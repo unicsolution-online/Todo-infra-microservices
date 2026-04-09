@@ -1,19 +1,71 @@
-name: Test Self Hosted Runner
+name: Azure Terraform CI/CD
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  test:
+
+  #  Terraform Plan
+  terraform-plan:
     runs-on: [self-hosted, Windows, X64]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Print Info
-        run: |
-          echo "Runner is working"
-          hostname
-          pwd
-          dir
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+
+    - name: Upload Plan Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfplan
+        path: tfplan
+
+
+  # Terraform Apply (Manual Approval)
+  terraform-apply:
+    runs-on: [self-hosted, Windows, X64]
+    needs: terraform-plan
+
+    environment:
+      name: dev   # 👈 tumne jo env banaya hai
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Download Plan
+      uses: actions/download-artifact@v3
+      with:
+        name: tfplan
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
