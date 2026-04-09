@@ -1,118 +1,70 @@
-name: Azure Terraform CI/CD (Job Level)
+name: Azure Terraform CI/CD
 
 on:
   push:
     branches:
-      - main   #  main branch pe trigger
+      - main
 
 jobs:
 
-  # =========================
-  #  JOB 1: TERRAFORM PLAN
-  # =========================
+  #  PLAN JOB
   terraform-plan:
-    name: Terraform Plan
     runs-on: [self-hosted, Windows, X64]
 
-    outputs:
-      plan-status: ${{ steps.plan.outcome }}   #  job  status
-
     steps:
-
-    #  Code checkout
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Azure login using Service Principal
     - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    #  Terraform setup
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    #  Init (providers/backend download)
     - name: Terraform Init
       run: terraform init -input=false
 
-    #  Validate terraform files
     - name: Terraform Validate
       run: terraform validate
 
-    # Plan generate (tfplan file create hogi)
     - name: Terraform Plan
-      id: plan
-      run: terraform plan -out=tfplan
-
-    # Debug: check tfplan file exist
-    - name: Debug - List files
-      run: dir
-
-    #  Upload tfplan as artifact
-    - name: Upload Plan Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: tfplan
-        path: ./tfplan
+      run: terraform plan   #  no tfplan file
 
 
-  # =========================
-  # JOB 2: APPROVAL STAGE
-  # =========================
+  #  APPROVAL JOB
   approval:
-    name: Manual Approval
     runs-on: [self-hosted, Windows, X64]
-    needs: terraform-plan   #  plan ke baad hi chalega
+    needs: terraform-plan
 
-    #  GitHub Environment → manual approval trigger
     environment:
-      name: dev   #  repo me environment configured hona chahiye
+      name: dev
 
     steps:
-    - name: Approval Gate
-      run: echo "Waiting for manual approval..."
+    - name: Wait for approval
+      run: echo "Waiting for approval..."
 
 
-  # =========================
-  #  JOB 3: TERRAFORM APPLY
-  # =========================
+  #  APPLY JOB
   terraform-apply:
-    name: Terraform Apply
     runs-on: [self-hosted, Windows, X64]
-    needs: approval   #  approval ke baad hi chalega
+    needs: approval
 
     steps:
-
-    # Checkout code again (new job = fresh workspace)
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    #  Azure login again
     - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # Terraform setup 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    # Terraform init again
     - name: Terraform Init
       run: terraform init -input=false
 
-    #  Download tfplan artifact from previous job
-    - name: Download Plan
-      uses: actions/download-artifact@v4
-      with:
-        name: tfplan
-
-    # Debug: confirm file downloaded
-    - name: Debug - List files
-      run: dir
-
-    # Apply using same plan file
     - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
+      run: terraform apply -auto-approve   #  direct apply
