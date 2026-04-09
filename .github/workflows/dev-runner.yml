@@ -7,13 +7,13 @@ on:
 
 jobs:
 
-  #  Terraform Plan
+  # Terraform Plan
   terraform-plan:
-    runs-on: self-hosted
+    runs-on: [self-hosted, Windows, X64]
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Azure Login
       uses: azure/login@v1
@@ -24,7 +24,7 @@ jobs:
       uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -input=false
 
     - name: Terraform Validate
       run: terraform validate
@@ -33,7 +33,7 @@ jobs:
       run: terraform plan -out=tfplan
 
     - name: Upload Plan Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: tfplan
         path: tfplan
@@ -45,11 +45,11 @@ jobs:
     needs: terraform-plan
 
     environment:
-      name: dev   # env banaya hai
+      name: dev
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Azure Login
       uses: azure/login@v1
@@ -60,10 +60,10 @@ jobs:
       uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -input=false
 
     - name: Download Plan
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: tfplan
 
