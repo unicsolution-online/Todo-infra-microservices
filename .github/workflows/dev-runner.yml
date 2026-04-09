@@ -45,7 +45,7 @@ jobs:
     needs: terraform-plan
 
     environment:
-      name: dev   # 👈 tumne jo env banaya hai
+      name: dev   # env banaya hai
 
     steps:
     - name: Checkout Code
