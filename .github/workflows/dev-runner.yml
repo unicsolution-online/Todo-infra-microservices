@@ -24,15 +24,12 @@ jobs:
 
     - name: Terraform Init
       run: terraform init -input=false
-      working-directory: ./Todo-infra-microservices   # 👈 IMPORTANT
 
     - name: Terraform Validate
       run: terraform validate
-      working-directory: ./Todo-infra-microservices   # 👈 IMPORTANT
 
     - name: Terraform Plan
       run: terraform plan
-      working-directory: ./Todo-infra-microservices   # 👈 IMPORTANT
 
 
   approval:
@@ -64,8 +61,6 @@ jobs:
 
     - name: Terraform Init
       run: terraform init -input=false
-      working-directory: ./Todo-infra-microservices   # 👈 IMPORTANT
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
-      working-directory: ./Todo-infra-microservices   # 👈 IMPORTANT
